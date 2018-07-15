@@ -15,7 +15,7 @@ copied color name to clipboard - if you have a color copied in the clipboard, th
 Set viewport color from node - try to find a node with color and apply it to viewport color
 
 
-Call the *copied color name to clipboard* from anywhere : In the search bar look for convert clipboard color to name
+Call the *copied color name to clipboard* from anywhere : In the search bar look for '*convert clipboard color to name*'
 
 #### note:
 this addon use *webcolors* module (will propose to download automatically at first use)
@@ -27,6 +27,6 @@ However, if you want to install it manually follow this:
 Method A: with PIP: using command "pip install webcolors"  
 the webcolors.py module will be in the site-packages folder ("yourLocalFolder.../Python/Python35/Lib/site-packages")  
 Method B: directly get the file from github > https://github.com/ubernostrum/webcolors/blob/master/webcolors.py
- 
-- STEP 2 - copy the webcolors.py module in the blender modules folder of your version
+  
+- STEP 2 - copy the webcolors.py module in the blender modules folder of your version  
 exemple on windows, located in : *C:\Program Files\Blender Foundation\Blender\2.79\scripts\modules*
