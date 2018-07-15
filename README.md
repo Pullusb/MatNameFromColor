@@ -14,9 +14,8 @@ Rename from nodes - rename the material according to nodes (experimetal, try to 
 copied color name to clipboard - if you have a color copied in the clipboard, the clipboard will be replaced by the name of the color
 Set viewport color from node - try to find a node with color and apply it to viewport color
 
-note on the
-In the search bar search for 
-convert clipboard color to name -  Convert color in paperclip to name (replace paperclip)
+
+Call the *copied color name to clipboard* from anywhere : In the search bar look for convert clipboard color to name
 
 #### note:
 this addon use *webcolors* module (will propose to download automatically at first use)
@@ -24,9 +23,9 @@ this addon use *webcolors* module (will propose to download automatically at fir
 However, if you want to install it manually follow this:
 
 *Webcolors* install note
-- STEP 1 - download the module:
-Method A: with PIP: using command "pip install webcolors"
-the webcolors.py module will be in the site-packages folder ("yourLocalFolder.../Python/Python35/Lib/site-packages")
+- STEP 1 - download the module:  
+Method A: with PIP: using command "pip install webcolors"  
+the webcolors.py module will be in the site-packages folder ("yourLocalFolder.../Python/Python35/Lib/site-packages")  
 Method B: directly get the file from github > https://github.com/ubernostrum/webcolors/blob/master/webcolors.py
  
 - STEP 2 - copy the webcolors.py module in the blender modules folder of your version
