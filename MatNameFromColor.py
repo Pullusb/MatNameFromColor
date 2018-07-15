@@ -8,7 +8,7 @@ bl_info = {
     "blender": (2, 79, 0),
     "location": "Properties > material > Settings",
     "warning": "",
-    "wiki_url": "",
+    "wiki_url": "https://github.com/Pullusb/MatNameFromColor",
     "category": "Material" }
     
 import bpy
