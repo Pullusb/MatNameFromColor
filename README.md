@@ -18,6 +18,7 @@ note on the
 In the search bar search for 
 convert clipboard color to name -  Convert color in paperclip to name (replace paperclip)
 
+#### note:
 this addon use *webcolors* module (will propose to download automatically at first use)
 
 However, if you want to install it manually follow this:
