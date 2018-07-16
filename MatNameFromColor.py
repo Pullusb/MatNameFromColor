@@ -4,7 +4,7 @@ bl_info = {
     "name": "Auto name material",
     "description": "rename material with closest english name according to rgb color",
     "author": "Samuel Bernou",
-    "version": (0, 0, 1),
+    "version": (0, 0, 2),
     "blender": (2, 79, 0),
     "location": "Properties > material > Settings",
     "warning": "",
@@ -110,8 +110,7 @@ def get_closest_node_color(mat):
  
     #go up in the tree until color found (get the 'last' color found ? or color of first node ?)
     return find_color_up_tree(out)
- 
- 
+
  
 def get_material_color(mat, viewport=False):
     '''return closest color from nodes (cycle only), or viewport color'''
@@ -172,15 +171,56 @@ def match_color_viewport_from_node(variables={}):
                 return
             else:
                 report('cant find color in the node tree...', self=self, mode='ERROR')
-'''#useless mais on sait jamais...
-def match_color_node_from_viewport():
-    pass
-'''
- 
-#test
-#rename_active_mat(viewport=False)
-#match_color_viewport_from_node()
 
+
+##-- useless but we never know... ---
+
+def set_closest_node_color(mat, color):
+    '''Change only fisrt connected node (not recursive)'''
+    if not mat.use_nodes:
+        print('material is not node based')
+        return
+    #get output node
+    nodes = mat.node_tree.nodes
+    out = None
+    for n in nodes:
+        if n.type == 'OUTPUT_MATERIAL':
+            out = n
+            break
+    if not out:
+        return
+ 
+    if not out.inputs['Surface'].is_linked:
+        return
+    
+    node = out.inputs['Surface'].links[0].from_node
+    colsocket = node.inputs.get('Base Color')
+    if not colsocket:
+        colsocket = node.inputs.get('Color')
+    if colsocket:
+        colsocket.default_value = color
+        return node
+
+def match_color_node_from_viewport(variables={}):
+    self = variables.get('self')
+    ob = bpy.context.active_object
+    if ob:
+        mat = ob.active_material
+        if mat:
+            color = mat.diffuse_color
+            if color:
+                color = list(color[:]) + [1.0]
+                print("color", color)#Dbg
+                #print(convert_color_to_name(color))
+                node = set_closest_node_color(mat,color)
+                if not node:
+                    report('cant find a node to set color in the node tree... (this try only with the first node connected to "Surface")', self=self, mode='ERROR')
+                    return
+                report('color changed in node', node.name, self=self)
+                return True
+                
+        
+### end of useless ---
 
 ### -- module webcolors downloader
 class DL_webcolors_module(bpy.types.Operator):
@@ -269,12 +309,16 @@ class ViewportColorFromNode(bpy.types.Operator):
     bl_description = "Set the viewport color of active material with color found in node"
     bl_options = {"REGISTER"}
  
+    from_viewport = bpy.props.BoolProperty()
     @classmethod
     def poll(cls, context):
         return True
  
     def execute(self, context):
-        match_color_viewport_from_node(variables={'self':self, 'context':context})
+        if self.from_viewport:
+            match_color_node_from_viewport(variables={'self':self, 'context':context})
+        else:
+            match_color_viewport_from_node(variables={'self':self, 'context':context})
         return {"FINISHED"}
  
 class ConvertClipboardColorToName(bpy.types.Operator):
@@ -318,8 +362,11 @@ def MaterialPlus(self, context):
     row.operator(AutoNameMaterial.bl_idname, text = "Rename from nodes", icon='NODETREE').viewport = False
     row = layout.row(align=False)
     row.operator(ConvertClipboardColorToName.bl_idname, text = "copied color name to clipboard", icon='COLOR') 
-    row = layout.row(align=False)
-    row.operator(ViewportColorFromNode.bl_idname, text = "Set viewport color from node", icon='NLA_PUSHDOWN') 
+    
+    layout.separator()
+    split = layout.split(percentage=0.65, align=True)
+    split.operator(ViewportColorFromNode.bl_idname, text = "Set viewport color from node", icon='NLA_PUSHDOWN').from_viewport = False
+    split.operator(ViewportColorFromNode.bl_idname, text = "Color Node", icon='TRIA_UP_BAR').from_viewport = True
  
 ################## Registration
  
