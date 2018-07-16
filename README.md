@@ -13,11 +13,12 @@ Add 4 buttons in the 'settings' panel of the material
 *Rename from nodes* - Rename the material according to nodes (experimetal, try to find a node with color)  
 *copied color name to clipboard* - If you have a color copied in the clipboard, the clipboard will be replaced by the name of the color  
   
+> Tips : Call the *copied color name to clipboard* from anywhere : In the search bar look for '*convert clipboard color to name*'  
+  
 *Set viewport color from node* - Try to find a node with color and apply it to viewport color  
 *Color node* - Inverse of previous, set viewport color on the first node connected to Surface material output  
 
 
-> Hints : Call the *copied color name to clipboard* from anywhere : In the search bar look for '*convert clipboard color to name*'
 
 #### note:
 this addon use *webcolors* module (will propose to download automatically at first use)
