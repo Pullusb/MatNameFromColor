@@ -19,6 +19,11 @@ Add 4 buttons in the 'settings' panel of the material
 *Color node* - Inverse of previous, set viewport color on the first node connected to Surface material output  
 
 
+#### updates:
+
+  - 2018/07/22 - 0.3:
+    added *Affect all slots of selection* (check box). Allow to work on active object or every materials associated with selected objects
+
 
 #### note:
 this addon use *webcolors* module (will propose to download automatically at first use)
