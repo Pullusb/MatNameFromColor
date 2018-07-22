@@ -4,7 +4,7 @@ bl_info = {
     "name": "Auto name material",
     "description": "rename material with closest english name according to rgb color",
     "author": "Samuel Bernou",
-    "version": (0, 0, 2),
+    "version": (0, 0, 3),
     "blender": (2, 79, 0),
     "location": "Properties > material > Settings",
     "warning": "",
@@ -123,54 +123,66 @@ def get_material_color(mat, viewport=False):
 def rename_active_mat(viewport=True, variables={}):
     '''if any rename active material of active objects'''
     self = variables.get('self')
-    ob = bpy.context.active_object
-    if ob:
-        mat = ob.active_material
-        if mat:
-            #get color from material
-            col = get_material_color(mat,viewport)#True get viewport color, False get a connected node color (not optim...).
-            #convert to color (use webcolors module)
-            colname = convert_color_to_name(col)
- 
-            if colname:
-                if colname in mat.name:#check if already named
-                    report('Material "', mat.name, '" already has name:', colname, self=self, mode='WARNING')
-                else:
-                    #check if already exist
-                    used = 0
-                    if bpy.data.materials.get(colname):
-                        #warning
-                        used = 1
-                        report('rename, but', colname, 'already existed', self=self)
-                    mat.name = colname
-                    report(colname, self=self)
-                    print(colname, '"from', col, 'on active material')
-                    if used:
-                        report('material name now', mat.name, self=self)
-                    return True
+    matlist = material_selection_scope()
+    for i, mat in enumerate(matlist):
+        # print( mat.name, i+1, '/', len(matlist) )
+        #get color from material
+        col = get_material_color(mat,viewport)#True get viewport color, False get a connected node color (not optim...).
+        #convert to color (use webcolors module)
+        colname = convert_color_to_name(col)
+
+        if colname:
+            if colname in mat.name:#check if already named
+                report('Material "', mat.name, '" already has name:', colname, self=self, mode='WARNING')
             else:
-                report('Error trying to get color name from', col, self=self, mode='ERROR')
+                #check if already exist
+                used = 0
+                if bpy.data.materials.get(colname):
+                    #warning
+                    used = 1
+                    report('rename, but', colname, 'already existed', self=self)
+                mat.name = colname
+                report(colname, self=self)
+                print(colname, '"from', col, 'on active material')
+                if used:
+                    report('material name now', mat.name, self=self)
         else:
-            report("No active material", self=self, mode='ERROR')
+            report('Error trying to get color name from', col, self=self, mode='ERROR')
+ 
+
+def material_selection_scope():
+    '''Return a list of all material to change'''
+    scene = bpy.context.scene
+    if scene.mat_change_multiple:
+        matlist=[]
+        for ob in bpy.context.selected_objects:
+            for slot in ob.material_slots:
+                mat = slot.material
+                if mat:
+                    if mat not in matlist:
+                        matlist.append(mat)
+        print('material list', matlist)
+        return matlist
     else:
-        report("No active object", self=self, mode='ERROR')
- 
- 
+        ob = bpy.context.active_object
+        if ob:
+            mat = ob.active_material
+            if mat:
+                return [mat]
+        else:
+            print('no active object')
+
 def match_color_viewport_from_node(variables={}):
     self = variables.get('self')
-    ob = bpy.context.active_object
-    if ob:
-        mat = ob.active_material
-        if mat:
-            color = get_closest_node_color(mat)
- 
-            if color:
-                print("color", color)#Dbg
-                #print(convert_color_to_name(color))
-                mat.diffuse_color = color[:-1]
-                return
-            else:
-                report('cant find color in the node tree...', self=self, mode='ERROR')
+    for mat in material_selection_scope():
+        color = get_closest_node_color(mat)
+
+        if color:
+            print("color", color)#Dbg
+            #print(convert_color_to_name(color))
+            mat.diffuse_color = color[:-1]
+        else:
+            report('cant find color in the node tree...', self=self, mode='ERROR')
 
 
 ##-- useless but we never know... ---
@@ -203,21 +215,20 @@ def set_closest_node_color(mat, color):
 
 def match_color_node_from_viewport(variables={}):
     self = variables.get('self')
-    ob = bpy.context.active_object
-    if ob:
-        mat = ob.active_material
-        if mat:
-            color = mat.diffuse_color
-            if color:
-                color = list(color[:]) + [1.0]
-                print("color", color)#Dbg
-                #print(convert_color_to_name(color))
-                node = set_closest_node_color(mat,color)
-                if not node:
-                    report('cant find a node to set color in the node tree... (this try only with the first node connected to "Surface")', self=self, mode='ERROR')
-                    return
-                report('color changed in node', node.name, self=self)
-                return True
+    matlist = material_selection_scope()
+    for i, mat in enumerate(matlist):
+        # print( mat.name, i, '/', len(matlist) )
+        color = mat.diffuse_color
+        if color:
+            color = list(color[:]) + [1.0]
+            print("color", color)#Dbg
+            #print(convert_color_to_name(color))
+            node = set_closest_node_color(mat,color)
+            if not node:
+                report('cant find a node to set color in the node tree... (this try only with the first node connected to "Surface")', self=self, mode='ERROR')
+                continue
+            report('color changed in node', node.name, self=self)
+            #return True
                 
         
 ### end of useless ---
@@ -310,6 +321,7 @@ class ViewportColorFromNode(bpy.types.Operator):
     bl_options = {"REGISTER"}
  
     from_viewport = bpy.props.BoolProperty()
+    bpy.types.Scene.mat_change_multiple = bpy.props.BoolProperty(name="Affect all slots of selection", description="Affect all material slots of all selected objects, else only active slot of active object", default=False)
     @classmethod
     def poll(cls, context):
         return True
@@ -357,11 +369,12 @@ def MaterialPlus(self, context):
     """option for fast naming and changing materials"""
     layout = self.layout
     layout.label('Naming utils:')
+    layout.prop(context.scene, "mat_change_multiple")
     row = layout.row(align=True)
     row.operator(AutoNameMaterial.bl_idname, text = "Rename from viewport", icon='RESTRICT_COLOR_ON').viewport = True
     row.operator(AutoNameMaterial.bl_idname, text = "Rename from nodes", icon='NODETREE').viewport = False
     row = layout.row(align=False)
-    row.operator(ConvertClipboardColorToName.bl_idname, text = "copied color name to clipboard", icon='COLOR') 
+    row.operator(ConvertClipboardColorToName.bl_idname, text = "copied color name to clipboard", icon='COLOR')
     
     layout.separator()
     split = layout.split(percentage=0.65, align=True)
