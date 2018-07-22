@@ -9,6 +9,7 @@ bl_info = {
     "location": "Properties > material > Settings",
     "warning": "",
     "wiki_url": "https://github.com/Pullusb/MatNameFromColor",
+    "tracker_url": "https://github.com/Pullusb/MatNameFromColor/issues",
     "category": "Material" }
     
 import bpy
