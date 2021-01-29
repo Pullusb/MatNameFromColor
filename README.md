@@ -37,4 +37,4 @@ the webcolors.py module will be in the site-packages folder ("yourLocalFolder...
 Method B: directly get the file from github > https://github.com/ubernostrum/webcolors/blob/master/webcolors.py
   
 - STEP 2 - copy the webcolors.py module in the blender modules folder of your version  
-exemple on windows, located in : *C:\Program Files\Blender Foundation\Blender\2.79\scripts\modules*
+example on windows, located in : *C:\Program Files\Blender Foundation\Blender\2.79\scripts\modules*
